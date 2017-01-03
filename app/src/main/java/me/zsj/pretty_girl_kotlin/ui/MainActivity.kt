@@ -128,7 +128,8 @@ class MainActivity : RxAppCompatActivity() {
                                         compat.toBundle())
                             }
 
-                            override fun onError() { }
+                            override fun onError() {
+                            }
                         })
             }
         })
@@ -146,7 +147,7 @@ class MainActivity : RxAppCompatActivity() {
         val results = girlApi.fetchPrettyGirl(page)
                 .compose(bindToLifecycle<Result<GirlData>>())
                 .filter(Results.isSuccess())
-                .map {girlData -> girlData.response().body()}
+                .map { girlData -> girlData.response().body() }
                 .flatMap(imageFetcher)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
@@ -170,7 +171,8 @@ class MainActivity : RxAppCompatActivity() {
     }
 
     private var dataError = Action1<Throwable> {
-        throwable -> throwable.printStackTrace()
+        throwable ->
+        throwable.printStackTrace()
         binding!!.refreshLayout.isRefreshing = false
         Toast.makeText(this, throwable.message, Toast.LENGTH_SHORT).show()
     }

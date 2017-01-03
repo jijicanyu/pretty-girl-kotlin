@@ -15,7 +15,7 @@ interface GirlApiComponent : GirlGraph {
     class Initializer private constructor() {
 
         companion object {
-            @JvmStatic fun init() : GirlApiComponent {
+            @JvmStatic fun init(): GirlApiComponent {
                 return DaggerGirlApiComponent.builder()
                         .girlApiModule(GirlApiModule())
                         .build()

@@ -71,7 +71,7 @@ class GirlAdapter : RecyclerView.Adapter<GirlAdapter.Holder>, Action1<List<Image
             binding = DataBindingUtil.bind(itemView)
             RxView.clicks(binding!!.girlLayout)
                     .throttleFirst(1, TimeUnit.SECONDS)
-                    .subscribe{ aVoid ->
+                    .subscribe { aVoid ->
                         onTouchListener!!.onImageClick(binding!!.image, image!!)
                     }
         }

@@ -27,7 +27,7 @@ class GirlRetrofit() {
         girlApi = retrofit.create(GirlApi::class.java)
     }
 
-    fun girlApi() : GirlApi {
+    fun girlApi(): GirlApi {
         return girlApi!!
     }
 

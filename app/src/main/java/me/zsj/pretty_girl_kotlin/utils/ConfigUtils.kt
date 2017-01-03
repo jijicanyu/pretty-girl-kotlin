@@ -11,7 +11,7 @@ class ConfigUtils {
     companion object {
 
         @JvmStatic
-        fun isOrientationPortrait(context: Context) : Boolean {
+        fun isOrientationPortrait(context: Context): Boolean {
             if (context.resources.configuration.orientation ==
                     Configuration.ORIENTATION_PORTRAIT) {
                 return true
@@ -20,7 +20,7 @@ class ConfigUtils {
         }
 
         @JvmStatic
-        fun isOrientationLandscape(context: Context) : Boolean {
+        fun isOrientationLandscape(context: Context): Boolean {
             if (context.resources.configuration.orientation ==
                     Configuration.ORIENTATION_LANDSCAPE) {
                 return true

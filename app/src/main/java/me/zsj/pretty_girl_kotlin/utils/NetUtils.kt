@@ -11,7 +11,7 @@ class NetUtils {
     companion object {
 
         @JvmStatic
-        fun checkNet(context: Context) : Boolean {
+        fun checkNet(context: Context): Boolean {
             var isWifiConnected = isWifiConnected(context)
             var isMobileConnected = isMobileConnected(context)
 
@@ -22,7 +22,7 @@ class NetUtils {
         }
 
         @JvmStatic
-        fun isWifiConnected(context: Context) : Boolean {
+        fun isWifiConnected(context: Context): Boolean {
             val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
                     as ConnectivityManager
 
@@ -34,7 +34,7 @@ class NetUtils {
         }
 
         @JvmStatic
-        fun isMobileConnected(context: Context) : Boolean {
+        fun isMobileConnected(context: Context): Boolean {
             val manager = context.getSystemService(Context.CONNECTIVITY_SERVICE)
                     as ConnectivityManager
 

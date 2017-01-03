@@ -12,7 +12,7 @@ class ScreenUtils {
     companion object {
 
         @JvmStatic
-        fun getWidth(context: Context) : Int {
+        fun getWidth(context: Context): Int {
             val manager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val size = Point()
             val display = manager.defaultDisplay
@@ -21,7 +21,7 @@ class ScreenUtils {
         }
 
         @JvmStatic
-        fun getHeight(context: Context) : Int {
+        fun getHeight(context: Context): Int {
             val manager = context.getSystemService(Context.WINDOW_SERVICE) as WindowManager
             val size = Point()
             val display = manager.defaultDisplay

@@ -38,7 +38,7 @@ class InsetsCoordinatorLayout : CoordinatorLayout, View.OnApplyWindowInsetsListe
         if (ltr) paddingRight += r
         else paddingRight = paddingEnd
 
-        setPadding(paddingLeft, paddingTop, paddingRight , paddingBottom)
+        setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
 
         setOnApplyWindowInsetsListener(null)
         return insets.consumeSystemWindowInsets()
