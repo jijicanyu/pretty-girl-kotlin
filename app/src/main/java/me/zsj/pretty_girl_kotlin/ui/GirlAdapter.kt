@@ -25,6 +25,7 @@ class GirlAdapter : RecyclerView.Adapter<GirlAdapter.Holder>, Action1<List<Image
 
     constructor(images: List<Image>) {
         this.images = images
+        setHasStableIds(true)
     }
 
     fun setOnTouchListener(onTouchListener: OnTouchListener) {
@@ -55,7 +56,11 @@ class GirlAdapter : RecyclerView.Adapter<GirlAdapter.Holder>, Action1<List<Image
 
     override fun getItemViewType(position: Int): Int {
         val image = images!![position]
-        return Math.round(image.width!!.toFloat() / image.height!!.toFloat())
+        return Math.round(image.width!!.toFloat() / image.height!!.toFloat() * 10f)
+    }
+
+    override fun getItemId(position: Int): Long {
+        return images!![position].hashCode().toLong()
     }
 
     override fun call(t: List<Image>?) {
