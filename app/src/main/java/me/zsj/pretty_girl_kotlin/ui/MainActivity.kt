@@ -164,11 +164,7 @@ class MainActivity : RxAppCompatActivity() {
         val girls = it.results!! //it represent girlData
         for (girl in girls) {
             val bitmap = Picasso.with(this).load(girl.url).get()
-            val image = Image()
-            image.width = bitmap.width
-            image.height = bitmap.height
-            image.url = girl.url
-            images.add(image)
+            images.add(Image(bitmap.width, bitmap.height, girl.url))
         }
         return@Func1 Observable.just(images)
     }
