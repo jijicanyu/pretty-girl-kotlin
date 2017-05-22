@@ -40,6 +40,7 @@ class MainActivity : RxAppCompatActivity() {
     private var adapter: GirlAdapter? = null
 
     @Inject lateinit var girlApi: GirlApi
+    private var layoutManager: StaggeredGridLayoutManager? = null
     private var page: Int = 1
     private var refreshing: Boolean = false
     private var images = ArrayList<Image>()
@@ -61,13 +62,15 @@ class MainActivity : RxAppCompatActivity() {
     fun flyToTop() {
         RxView.clicks(binding!!.toolbar)
                 .compose(bindToLifecycle<Void>())
-                .subscribe { aVoid -> binding!!.recyclerView.smoothScrollToPosition(0) }
+                .subscribe {
+                    layoutManager!!.scrollToPositionWithOffset(0, 0)
+                }
     }
 
     fun swipeRefresh() {
         RxSwipeRefreshLayout.refreshes(binding!!.refreshLayout)
                 .compose(bindToLifecycle<Void>())
-                .subscribe { aVoid ->
+                .subscribe {
                     page = 1
                     refreshing = true
                     fetchGirlData()
@@ -76,30 +79,28 @@ class MainActivity : RxAppCompatActivity() {
 
     fun setupRecyclerView() {
         adapter = GirlAdapter(images)
-        var spanCount = 2
-        if (ConfigUtils.isOrientationPortrait(this)) spanCount = 2
-        else if (ConfigUtils.isOrientationLandscape(this)) spanCount = 3
+        var spanCount = if (ConfigUtils.isOrientationPortrait(this)) 2
+        else 3
 
-        val layoutManager = StaggeredGridLayoutManager(spanCount,
+        layoutManager = StaggeredGridLayoutManager(spanCount,
                 StaggeredGridLayoutManager.VERTICAL)
         binding!!.recyclerView.layoutManager = layoutManager
-        binding!!.recyclerView.adapter = this.adapter
+        binding!!.recyclerView.adapter = adapter
 
         RxRecyclerView.scrollEvents(binding!!.recyclerView)
                 .compose(bindUntilEvent<RecyclerViewScrollEvent>(ActivityEvent.DESTROY))
-                .map { scrollEvent ->
-                    var isBottom = false
-                    if (ConfigUtils.isOrientationPortrait(this)) {
-                        isBottom = layoutManager.findLastCompletelyVisibleItemPositions(
+                .map {
+                    val isBottom = if (ConfigUtils.isOrientationPortrait(this)) {
+                        layoutManager!!.findLastCompletelyVisibleItemPositions(
                                 IntArray(2))[1] >= this.images.size - 4
-                    } else if (ConfigUtils.isOrientationLandscape(this)) {
-                        isBottom = layoutManager.findLastCompletelyVisibleItemPositions(
+                    } else {
+                         layoutManager!!.findLastCompletelyVisibleItemPositions(
                                 IntArray(3))[2] >= this.images.size - 4
                     }
                     return@map isBottom
                 }
                 .filter { isBottom -> !binding!!.refreshLayout.isRefreshing && isBottom }
-                .subscribe { scrollEvent ->
+                .subscribe {
                     //这么做的目的是一旦下拉刷新，RxRecyclerView scrollEvents 也会被触发，page就会加一
                     //所以要将page设为0，这样下拉刷新才能获取第一页的数据
                     if (refreshing) {
@@ -147,18 +148,20 @@ class MainActivity : RxAppCompatActivity() {
         val results = girlApi.fetchPrettyGirl(page)
                 .compose(bindToLifecycle<Result<GirlData>>())
                 .filter(Results.isSuccess())
-                .map { girlData -> girlData.response().body() }
+                .filter { it.response().body() != null } //it represent girlData
+                .map { it.response().body() }
                 .flatMap(imageFetcher)
                 .subscribeOn(Schedulers.io())
                 .observeOn(AndroidSchedulers.mainThread())
+                .cache()
 
         results.filter(Results.isNull())
                 .doOnCompleted { binding!!.refreshLayout.isRefreshing = false }
                 .subscribe(adapter, dataError)
     }
 
-    private var imageFetcher = Func1<GirlData, Observable<List<Image>>> { girlData ->
-        val girls = girlData.results!!
+    private var imageFetcher = Func1<GirlData, Observable<List<Image>>> {
+        val girls = it.results!! //it represent girlData
         for (girl in girls) {
             val bitmap = Picasso.with(this).load(girl.url).get()
             val image = Image()
@@ -170,8 +173,7 @@ class MainActivity : RxAppCompatActivity() {
         return@Func1 Observable.just(images)
     }
 
-    private var dataError = Action1<Throwable> {
-        throwable ->
+    private var dataError = Action1<Throwable> { throwable ->
         throwable.printStackTrace()
         binding!!.refreshLayout.isRefreshing = false
         Toast.makeText(this, throwable.message, Toast.LENGTH_SHORT).show()

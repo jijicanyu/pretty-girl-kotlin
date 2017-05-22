@@ -9,10 +9,10 @@ import java.util.concurrent.TimeUnit
 /**
  * @author zsj
  */
-class GirlRetrofit() {
+class GirlRetrofit {
 
     private val GANK_URL: String = "http://gank.io/api/"
-    private var girlApi: GirlApi? = null
+    private var girlApi: GirlApi
 
     init {
         val builder = OkHttpClient.Builder()
@@ -28,7 +28,7 @@ class GirlRetrofit() {
     }
 
     fun girlApi(): GirlApi {
-        return girlApi!!
+        return girlApi
     }
 
 }

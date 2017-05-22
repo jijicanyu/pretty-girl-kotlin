@@ -17,14 +17,13 @@ import java.util.concurrent.TimeUnit
 /**
  * @author zsj
  */
-class GirlAdapter : RecyclerView.Adapter<GirlAdapter.Holder>, Action1<List<Image>> {
+class GirlAdapter(images: List<Image>) : RecyclerView.Adapter<GirlAdapter.Holder>(), Action1<List<Image>> {
 
-    private var images: List<Image>? = null
+    private var images: List<Image>? = images
     private var onTouchListener: OnTouchListener? = null
 
 
-    constructor(images: List<Image>) {
-        this.images = images
+    init {
         setHasStableIds(true)
     }
 

@@ -15,7 +15,7 @@ class NetUtils {
             var isWifiConnected = isWifiConnected(context)
             var isMobileConnected = isMobileConnected(context)
 
-            if (isWifiConnected == false && isMobileConnected == false) {
+            if (!isWifiConnected && !isMobileConnected) {
                 return false
             }
             return true
