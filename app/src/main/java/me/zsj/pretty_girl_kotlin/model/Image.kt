@@ -5,4 +5,4 @@ package me.zsj.pretty_girl_kotlin.model
  */
 data class Image(val width: Int,
                  val height: Int,
-                 val url: String)
+                 val url: String?)

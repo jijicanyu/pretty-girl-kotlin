@@ -68,9 +68,8 @@ class PullBackLayout : FrameLayout {
 
         override fun onViewReleased(releasedChild: View?, xvel: Float, yvel: Float) {
             super.onViewReleased(releasedChild, xvel, yvel)
-            var slop = 0
-            if (yvel > mMinimumFlingVelocity) slop = height / 6
-            else slop = height / 3
+            val slop = if (yvel > mMinimumFlingVelocity) height / 6
+            else height / 3
             if (releasedChild!!.top > slop) {
                 pullCallback!!.onPullCompleted()
             } else {
@@ -106,7 +105,7 @@ class PullBackLayout : FrameLayout {
     }
 
     override fun onTouchEvent(event: MotionEvent?): Boolean {
-        dragHelper!!.processTouchEvent(event)
+        dragHelper?.processTouchEvent(event)
         return true
     }
 

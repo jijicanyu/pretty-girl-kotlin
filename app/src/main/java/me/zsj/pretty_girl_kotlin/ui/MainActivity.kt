@@ -7,11 +7,9 @@ import android.support.v4.app.ActivityCompat
 import android.support.v4.app.ActivityOptionsCompat
 import android.support.v7.widget.StaggeredGridLayoutManager
 import android.view.View
-import android.widget.Toast
 import com.jakewharton.rxbinding.support.v4.widget.RxSwipeRefreshLayout
 import com.jakewharton.rxbinding.support.v7.widget.RecyclerViewScrollEvent
 import com.jakewharton.rxbinding.support.v7.widget.RxRecyclerView
-import com.jakewharton.rxbinding.view.RxView
 import com.squareup.picasso.Callback
 import com.squareup.picasso.Picasso
 import com.trello.rxlifecycle.android.ActivityEvent
@@ -25,6 +23,8 @@ import me.zsj.pretty_girl_kotlin.model.GirlData
 import me.zsj.pretty_girl_kotlin.model.Image
 import me.zsj.pretty_girl_kotlin.utils.ConfigUtils
 import me.zsj.pretty_girl_kotlin.utils.NetUtils
+import me.zsj.pretty_girl_kotlin.utils.dimensSize
+import me.zsj.pretty_girl_kotlin.utils.short
 import retrofit2.adapter.rxjava.Result
 import rx.Observable
 import rx.android.schedulers.AndroidSchedulers
@@ -48,23 +48,16 @@ class MainActivity : RxAppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
         binding = DataBindingUtil.setContentView<MainActivityBinding>(this, R.layout.main_activity)
-        setSupportActionBar(binding!!.toolbar)
+        val offset = dimensSize(R.dimen.toolbar_default_height)
+        binding?.refreshLayout?.setProgressViewOffset(true, 0, offset)
 
         GirlApiComponent.Initializer.init().inject(this)
 
-        flyToTop()
         swipeRefresh()
         setupRecyclerView()
-        onImageClick()
-    }
 
-    fun flyToTop() {
-        RxView.clicks(binding!!.toolbar)
-                .compose(bindToLifecycle<Void>())
-                .subscribe {
-                    layoutManager!!.scrollToPositionWithOffset(0, 0)
-                }
     }
 
     fun swipeRefresh() {
@@ -78,8 +71,8 @@ class MainActivity : RxAppCompatActivity() {
     }
 
     fun setupRecyclerView() {
-        adapter = GirlAdapter(images)
-        var spanCount = if (ConfigUtils.isOrientationPortrait(this)) 2
+        adapter = GirlAdapter(images) { v, image -> onImageClick(v, image) }
+        val spanCount = if (ConfigUtils.isOrientationPortrait(this)) 2
         else 3
 
         layoutManager = StaggeredGridLayoutManager(spanCount,
@@ -94,12 +87,12 @@ class MainActivity : RxAppCompatActivity() {
                         layoutManager!!.findLastCompletelyVisibleItemPositions(
                                 IntArray(2))[1] >= this.images.size - 4
                     } else {
-                         layoutManager!!.findLastCompletelyVisibleItemPositions(
+                        layoutManager!!.findLastCompletelyVisibleItemPositions(
                                 IntArray(3))[2] >= this.images.size - 4
                     }
                     return@map isBottom
                 }
-                .filter { isBottom -> !binding!!.refreshLayout.isRefreshing && isBottom }
+                .filter { !binding!!.refreshLayout.isRefreshing && it }
                 .subscribe {
                     //这么做的目的是一旦下拉刷新，RxRecyclerView scrollEvents 也会被触发，page就会加一
                     //所以要将page设为0，这样下拉刷新才能获取第一页的数据
@@ -113,33 +106,27 @@ class MainActivity : RxAppCompatActivity() {
                 }
     }
 
-    fun onImageClick() {
-        adapter!!.setOnTouchListener(object : GirlAdapter.OnTouchListener {
-            override fun onImageClick(v: View, image: Image) {
-                Picasso.with(this@MainActivity).load(image.url)
-                        .fetch(object : Callback {
-                            override fun onSuccess() {
-                                val intent = Intent(this@MainActivity, PictureActivity::class.java)
-                                intent.putExtra("url", image.url)
-                                val compat =
-                                        ActivityOptionsCompat.makeSceneTransitionAnimation(
-                                                this@MainActivity, v, "girl"
-                                        )
-                                ActivityCompat.startActivity(this@MainActivity, intent,
-                                        compat.toBundle())
-                            }
+    fun onImageClick(v: View, image: Image) {
+        Picasso.with(this@MainActivity).load(image.url)
+                .fetch(object : Callback {
+                    override fun onSuccess() {
+                        val intent = Intent(this@MainActivity, PictureActivity::class.java)
+                        intent.putExtra("url", image.url)
+                        val compat = ActivityOptionsCompat.makeSceneTransitionAnimation(
+                                this@MainActivity, v, "girl")
+                        ActivityCompat.startActivity(this@MainActivity, intent,
+                                compat.toBundle())
+                    }
 
-                            override fun onError() {
-                            }
-                        })
-            }
-        })
+                    override fun onError() {
+                    }
+                })
     }
 
     override fun onPostCreate(savedInstanceState: Bundle?) {
         super.onPostCreate(savedInstanceState)
         if (!NetUtils.checkNet(this)) {
-            Toast.makeText(this, "不开网络没妹纸看哟!", Toast.LENGTH_LONG).show()
+            short(R.string.no_network)
         }
         fetchGirlData()
     }
@@ -160,8 +147,8 @@ class MainActivity : RxAppCompatActivity() {
                 .subscribe(adapter, dataError)
     }
 
-    private var imageFetcher = Func1<GirlData, Observable<List<Image>>> {
-        val girls = it.results!! //it represent girlData
+    private val imageFetcher = Func1<GirlData, Observable<List<Image>>> {
+        val girls = it.results //it represent girlData
         for (girl in girls) {
             val bitmap = Picasso.with(this).load(girl.url).get()
             images.add(Image(bitmap.width, bitmap.height, girl.url))
@@ -169,10 +156,10 @@ class MainActivity : RxAppCompatActivity() {
         return@Func1 Observable.just(images)
     }
 
-    private var dataError = Action1<Throwable> { throwable ->
+    private val dataError = Action1<Throwable> { throwable ->
         throwable.printStackTrace()
         binding!!.refreshLayout.isRefreshing = false
-        Toast.makeText(this, throwable.message, Toast.LENGTH_SHORT).show()
+        short(throwable.message)
     }
 
 }

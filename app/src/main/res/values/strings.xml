@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Pretty Girl</string>
+
+    <string name="no_network">不开网络没妹纸看哟!</string>
 </resources>

@@ -82,7 +82,7 @@ class PictureActivity : RxAppCompatActivity(), PullBackLayout.PullCallback {
 
     override fun onPull(progress: Float) {
         showSystemUi()
-        background!!.alpha = (0xff * (1.toFloat() - progress)).toInt()
+        background?.alpha = (0xff * (1.toFloat() - progress)).toInt()
     }
 
     override fun onPullCompleted() {

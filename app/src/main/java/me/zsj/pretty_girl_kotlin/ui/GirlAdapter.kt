@@ -17,36 +17,39 @@ import java.util.concurrent.TimeUnit
 /**
  * @author zsj
  */
-class GirlAdapter(images: List<Image>) : RecyclerView.Adapter<GirlAdapter.Holder>(), Action1<List<Image>> {
+class GirlAdapter(images: List<Image>, val onTouchListener: (View, Image) -> Unit) :
+        RecyclerView.Adapter<GirlAdapter.Holder>(), Action1<List<Image>> {
 
     private var images: List<Image>? = images
-    private var onTouchListener: OnTouchListener? = null
-
 
     init {
         setHasStableIds(true)
     }
 
-    fun setOnTouchListener(onTouchListener: OnTouchListener) {
-        this.onTouchListener = onTouchListener
-    }
-
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): Holder {
-        val view = LayoutInflater.from(parent!!.context)
+        val view = LayoutInflater.from(parent?.context)
                 .inflate(R.layout.girl_item, parent, false)
         return Holder(view)
     }
 
     override fun onBindViewHolder(holder: Holder?, position: Int) {
         val image = images!![position]
-        holder!!.image = image
-        holder.binding!!.setImage(image)
-        holder.binding!!.executePendingBindings()
 
-        Glide.with(holder.binding!!.image.context)
-                .load(image.url)
-                .diskCacheStrategy(DiskCacheStrategy.SOURCE)
-                .into(holder.binding!!.image)
+        holder?.binding?.setImage(image)
+        holder?.binding?.executePendingBindings()
+
+        with(image) {
+            RxView.clicks(holder?.binding!!.girlLayout)
+                    .throttleFirst(1, TimeUnit.SECONDS)
+                    .subscribe {
+                        onTouchListener(holder.binding!!.image, this)
+                    }
+
+            Glide.with(holder.binding?.image?.context)
+                    .load(this.url)
+                    .diskCacheStrategy(DiskCacheStrategy.SOURCE)
+                    .into(holder.binding?.image)
+        }
     }
 
     override fun getItemCount(): Int {
@@ -55,7 +58,7 @@ class GirlAdapter(images: List<Image>) : RecyclerView.Adapter<GirlAdapter.Holder
 
     override fun getItemViewType(position: Int): Int {
         val image = images!![position]
-        return Math.round(image.width!!.toFloat() / image.height!!.toFloat() * 10f)
+        return Math.round(image.width.toFloat() / image.height.toFloat() * 10f)
     }
 
     override fun getItemId(position: Int): Long {
@@ -69,21 +72,11 @@ class GirlAdapter(images: List<Image>) : RecyclerView.Adapter<GirlAdapter.Holder
     inner class Holder(itemView: View) : RecyclerView.ViewHolder(itemView) {
 
         var binding: GirlItemBinding? = null
-        var image: Image? = null
 
         init {
             binding = DataBindingUtil.bind(itemView)
-            RxView.clicks(binding!!.girlLayout)
-                    .throttleFirst(1, TimeUnit.SECONDS)
-                    .subscribe { aVoid ->
-                        onTouchListener!!.onImageClick(binding!!.image, image!!)
-                    }
         }
 
-    }
-
-    interface OnTouchListener {
-        fun onImageClick(v: View, image: Image)
     }
 
 }

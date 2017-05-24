@@ -12,8 +12,8 @@ class NetUtils {
 
         @JvmStatic
         fun checkNet(context: Context): Boolean {
-            var isWifiConnected = isWifiConnected(context)
-            var isMobileConnected = isMobileConnected(context)
+            val isWifiConnected = isWifiConnected(context)
+            val isMobileConnected = isMobileConnected(context)
 
             if (!isWifiConnected && !isMobileConnected) {
                 return false

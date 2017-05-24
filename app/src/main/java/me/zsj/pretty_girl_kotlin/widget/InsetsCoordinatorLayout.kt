@@ -3,7 +3,6 @@ package me.zsj.pretty_girl_kotlin.widget
 import android.content.Context
 import android.support.design.widget.CoordinatorLayout
 import android.support.v7.widget.RecyclerView
-import android.support.v7.widget.Toolbar
 import android.util.AttributeSet
 import android.view.View
 import android.view.WindowInsets
@@ -15,7 +14,6 @@ import me.zsj.pretty_girl_kotlin.R
 class InsetsCoordinatorLayout : CoordinatorLayout, View.OnApplyWindowInsetsListener {
 
     private var recyclerView: RecyclerView? = null
-    private var toolbar: Toolbar? = null
 
     constructor(context: Context) : this(context, null)
 
@@ -27,10 +25,8 @@ class InsetsCoordinatorLayout : CoordinatorLayout, View.OnApplyWindowInsetsListe
     }
 
     override fun onApplyWindowInsets(v: View, insets: WindowInsets): WindowInsets {
-        val l = insets.systemWindowInsetLeft
         val t = insets.systemWindowInsetTop
         val r = insets.systemWindowInsetRight
-        toolbar?.setPadding(l, t, 0, 0)
 
         val ltr = recyclerView!!.layoutDirection == View.LAYOUT_DIRECTION_LTR
 
@@ -39,6 +35,7 @@ class InsetsCoordinatorLayout : CoordinatorLayout, View.OnApplyWindowInsetsListe
         else paddingRight = paddingEnd
 
         setPadding(paddingLeft, paddingTop, paddingRight, paddingBottom)
+        recyclerView!!.setPadding(paddingLeft, paddingTop + t, paddingRight, paddingBottom)
 
         setOnApplyWindowInsetsListener(null)
         return insets.consumeSystemWindowInsets()
@@ -46,7 +43,6 @@ class InsetsCoordinatorLayout : CoordinatorLayout, View.OnApplyWindowInsetsListe
 
     override fun onFinishInflate() {
         super.onFinishInflate()
-        toolbar = findViewById(R.id.toolbar) as Toolbar
         recyclerView = findViewById(R.id.recyclerView) as RecyclerView
     }
 
